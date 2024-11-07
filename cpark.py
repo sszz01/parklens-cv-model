@@ -1,7 +1,7 @@
 import cv2
 import pickle
 
-cap = cv2.VideoCapture("https://drive.google.com/file/d/1Dyd9cJjX77b2b2aCqvyt-_gal96gwdmD/view?usp=sharing") # select a video
+cap = cv2.VideoCapture("media/parking-lot.mp4") # select a video
 # success,frame=cap.read()
 # frame=cv2.resize(frame,(640,480))
 # roi=cv2.selectROI(frame)

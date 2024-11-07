@@ -2,7 +2,7 @@ import cv2
 import pickle
 import numpy as np
 
-cap = cv2.VideoCapture("https://drive.google.com/file/d/1Dyd9cJjX77b2b2aCqvyt-_gal96gwdmD/view?usp=sharing")
+cap = cv2.VideoCapture("media/parking-lot.mp4")
 with open("cparkyt", 'rb') as f:
     points = pickle.load(f)
 
