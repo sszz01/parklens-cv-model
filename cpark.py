@@ -36,7 +36,7 @@ while True:
 
     cv2.imshow("Frame", frame)
     cv2.setMouseCallback("Frame", drawing)
-    if cv2.waitKey(32) & 0xFF == 27:
+    if cv2.waitKey(32) == ord("q"): # quit when Q is pressed
         break
 cap.release()
 cv2.destroyAllWindows()
