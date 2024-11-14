@@ -1,7 +1,7 @@
 import cv2
 from ultralytics import YOLO
 
-model = YOLO('models/yolo11m.pt')
+model = YOLO('models/yolo11m.pt') # select a model
 cap = cv2.VideoCapture("../media/videoplayback.mp4")
 
 def motion_tracker(frame):
@@ -35,16 +35,12 @@ def motion_tracker(frame):
 
     return people, bicycles, cars, motorcycles, buses, trucks
 
-frame_id = 0
 while True:
     success, frame = cap.read()
     if not success:
         break
-    if frame_id % 5 == 0:
-        # perform detection
-        frame_id += 1
 
-    new_frame = cv2.resize(frame, (1920, 1080))
+    new_frame = cv2.resize(frame, (640, 480))
     people, bicycles, cars, motorcycles, buses, trucks = motion_tracker(new_frame)
 
     colors = {
