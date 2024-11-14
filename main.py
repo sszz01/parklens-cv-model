@@ -44,6 +44,6 @@ while True:
     crop(FrameDilate)
     cv2.imshow("Frame", frame)
 
-    if cv2.waitKey(32) & 0xFF == 27:
+    if cv2.waitKey(32) == ord("q"): # Quit when Q is pressed
         break
 cv2.destroyAllWindows()
