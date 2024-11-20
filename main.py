@@ -26,7 +26,7 @@ def crop(f):
 
 
 w, h = 29, 27
-
+#test
 while True:
     success, frame = cap.read()
     if success == False:
