@@ -1,10 +1,13 @@
 import cv2
 import pickle
 
-cap = cv2.VideoCapture("media/parking-lot.mp4") # select a video
+rpi_path = "/home/parkai/Downloads/parking-lot.mp4"
+git_path = "media/parking-lot.mp4"
+cap = cv2.VideoCapture(rpi_path) # select your path
 # success,frame=cap.read()
-# frame=cv2.resize(frame,(640,480))
+# frame=cv2.resize(frame,(640,480))+-
 # roi=cv2.selectROI(frame)
+
 try:
     with open("cparkyt", 'rb') as f:
         points = pickle.load(f)
