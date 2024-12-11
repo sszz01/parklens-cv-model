@@ -1,11 +1,16 @@
 import cv2
 from ultralytics import YOLO
 
-model = YOLO('models/yolo11m.pt') # select a model
-cap = cv2.VideoCapture("../media/videoplayback.mp4")
+rpi_path = "/home/parkai/Downloads/parking-lot.mp4"
+git_path = "media/parking-lot.mp4"
+model = YOLO('models/yolo11n.pt') # select a model
+model.export(format="ncnn")
+ncnn_model = YOLO("models/yolo11n_ncnn_model")
+cap = cv2.VideoCapture(rpi_path)
+# change dir ~/parklens-cv-model/media/parking-lot.mp4
 
 def motion_tracker(frame):
-    results = model(frame)
+    results = ncnn_model(frame)
 
     # lists of detected objects
     people = []
@@ -24,7 +29,7 @@ def motion_tracker(frame):
             people.append((int(x - w / 2), int(y - h / 2), int(w), int(h)))
         elif cls == 1:
             bicycles.append((int(x - w / 2), int(y - h / 2), int(w), int(h)))
-        elif cls == 2:
+        if cls == 2:
             cars.append((int(x - w / 2), int(y - h / 2), int(w), int(h)))
         elif cls == 3:
             motorcycles.append((int(x - w / 2), int(y - h / 2), int(w), int(h)))
