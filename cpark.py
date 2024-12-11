@@ -3,7 +3,7 @@ import pickle
 
 rpi_path = "/home/parkai/Downloads/parking-lot.mp4"
 git_path = "media/parking-lot.mp4"
-cap = cv2.VideoCapture(rpi_path) # select your path
+cap = cv2.VideoCapture(git_path) # select your path
 # success,frame=cap.read()
 # frame=cv2.resize(frame,(640,480))+-
 # roi=cv2.selectROI(frame)

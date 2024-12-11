@@ -2,19 +2,17 @@ import cv2
 from ultralytics import YOLO
 
 rpi_path = "/home/parkai/Downloads/parking-lot.mp4"
-git_path = "media/parking-lot.mp4"
+rpi_ncnn_path = "models/yolo11n_ncnn_model"
+git_path = "../media/parking-lot.mp4"
 model = YOLO('models/yolo11n.pt') # select a model
-model.export(format="ncnn")
-ncnn_model = YOLO("models/yolo11n_ncnn_model")
-cap = cv2.VideoCapture(rpi_path)
-# change dir ~/parklens-cv-model/media/parking-lot.mp4
+# model.export(format="ncnn") # uncomment when working on rasp pi
+# ncnn_model = YOLO("models/yolo11n_ncnn_model")
+cap = cv2.VideoCapture(git_path)
 
 def motion_tracker(frame):
-    results = ncnn_model(frame)
+    results = model(frame)
 
     # lists of detected objects
-    people = []
-    bicycles = []
     cars = []
     motorcycles = []
     buses = []
@@ -25,10 +23,6 @@ def motion_tracker(frame):
         x, y, w, h = result.xywh[0]
         cls = result.cls[0]
 
-        if cls == 0:
-            people.append((int(x - w / 2), int(y - h / 2), int(w), int(h)))
-        elif cls == 1:
-            bicycles.append((int(x - w / 2), int(y - h / 2), int(w), int(h)))
         if cls == 2:
             cars.append((int(x - w / 2), int(y - h / 2), int(w), int(h)))
         elif cls == 3:
@@ -38,7 +32,7 @@ def motion_tracker(frame):
         elif cls == 7:
             trucks.append((int(x - w / 2), int(y - h / 2), int(w), int(h)))
 
-    return people, bicycles, cars, motorcycles, buses, trucks
+    return cars, motorcycles, buses, trucks
 
 while True:
     success, frame = cap.read()
@@ -46,11 +40,9 @@ while True:
         break
 
     new_frame = cv2.resize(frame, (640, 480))
-    people, bicycles, cars, motorcycles, buses, trucks = motion_tracker(new_frame)
+    cars, motorcycles, buses, trucks = motion_tracker(new_frame)
 
     colors = {
-        'person': (0, 255, 255),  # Yellow
-        'bicycle': (255, 0, 255),  # Magenta
         'car': (0, 0, 255),  # Red
         'motorcycle': (255, 255, 0),  # Blue
         'bus': (255, 255, 255),  # White
@@ -58,15 +50,6 @@ while True:
     }
 
     # drawing rectangles around detected objects
-    for person in people:
-        x, y, w, h = person
-        cv2.rectangle(new_frame, (x, y), (x + w, y + h), colors['person'], 2)
-        cv2.putText(new_frame, "Person", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, colors['person'], 2)
-
-    for bicycle in bicycles:
-        x, y, w, h = bicycle
-        cv2.rectangle(new_frame, (x, y), (x + w, y + h), colors['bicycle'], 2)
-        cv2.putText(new_frame, "Bicycle", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, colors['bicycle'], 2)
 
     for car in cars:
         x, y, w, h = car
