@@ -2,12 +2,41 @@ import cv2
 from ultralytics import YOLO
 
 rpi_path = "/home/parkai/Downloads/parking-lot.mp4"
-rpi_ncnn_path = "models/yolo11n_ncnn_model"
 git_path = "../media/parking-lot.mp4"
-model = YOLO('models/yolo11n.pt') # select a model
-# model.export(format="ncnn") # uncomment when working on rasp pi
-# ncnn_model = YOLO("models/yolo11n_ncnn_model")
-cap = cv2.VideoCapture(git_path)
+
+models = {
+    "yolo11n_ncnn": "./yolo11n_ncnn_model",
+    "yolo11n": "models/yolo11n.pt",
+    "yolo11s": "models/yolo11s.pt",
+    "yolo11m": "models/yolo11m.pt",
+    "yolo11x": "models/yolo11x.pt",
+}
+
+env = input("Choose the device(PC or RPI): ")
+
+print("Available YOLO models:")
+for i, (name, path) in enumerate(models.items(), 1):
+    print(f"{i}: {name} ({path})")
+
+choice = input("Enter the number of the model you want to use (default: 1): ") or "1"
+
+try:
+    selected_model_name = list(models.keys())[int(choice) - 1]
+    if selected_model_name.endswith("_ncnn"):
+        model = YOLO("yolo11n.pt")
+        model.export(format="ncnn")
+except (IndexError, ValueError):
+    print("Invalid choice. Defaulting to the first model.")
+    selected_model_name = list(models.keys())[0]
+
+model_path = models[selected_model_name]
+print(f"Selected model: {selected_model_name} ({model_path})")
+
+model = YOLO(model_path)
+
+cap = cv2.VideoCapture(rpi_path if 'rpi' in env.lower() else git_path)
+
+print(f"Processing video from: {rpi_path if 'rpi' in env.lower() else git_path}")
 
 def motion_tracker(frame):
     results = model(frame)
