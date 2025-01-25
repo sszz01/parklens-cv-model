@@ -164,3 +164,5 @@ cparkyt
 models/
 .torchscript*
 yolo11n_ncnn_model/
+*.avi
+*.mov

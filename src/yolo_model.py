@@ -1,8 +1,9 @@
 import cv2
 from ultralytics import YOLO
+from data.colors import *
 
 rpi_path = "/home/parkai/Downloads/parking-lot.mp4"
-git_path = "../media/parking-lot.mp4"
+git_path = "../media/videos/parking-lot.mp4"
 
 models = {
     "yolo11n_ncnn": "./yolo11n_ncnn_model",
@@ -23,7 +24,7 @@ choice = input("Enter the number of the model you want to use (default: 1): ") o
 try:
     selected_model_name = list(models.keys())[int(choice) - 1]
     if selected_model_name.endswith("_ncnn"):
-        model = YOLO("yolo11n.pt")
+        model = YOLO("yolo11n_ncnn_model/yolo11n.pt")
         model.export(format="ncnn")
 except (IndexError, ValueError):
     print("Invalid choice. Defaulting to the first model.")
@@ -71,34 +72,27 @@ while True:
     new_frame = cv2.resize(frame, (640, 480))
     cars, motorcycles, buses, trucks = motion_tracker(new_frame)
 
-    colors = {
-        'car': (0, 0, 255),  # Red
-        'motorcycle': (255, 255, 0),  # Blue
-        'bus': (255, 255, 255),  # White
-        'truck': (255, 165, 0)  # Orange
-    }
-
     # drawing rectangles around detected objects
 
     for car in cars:
         x, y, w, h = car
-        cv2.rectangle(new_frame, (x, y), (x + w, y + h), colors['car'], 2)
-        cv2.putText(new_frame, "Car", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, colors['car'], 2)
+        cv2.rectangle(new_frame, (x, y), (x + w, y + h), COLOR_RED, 2)
+        cv2.putText(new_frame, "Car", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_RED, 2)
 
     for motorcycle in motorcycles:
         x, y, w, h = motorcycle
-        cv2.rectangle(new_frame, (x, y), (x + w, y + h), colors['motorcycle'], 2)
-        cv2.putText(new_frame, "Motorcycle", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, colors['motorcycle'], 2)
+        cv2.rectangle(new_frame, (x, y), (x + w, y + h), COLOR_BLUE, 2)
+        cv2.putText(new_frame, "Motorcycle", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_BLUE, 2)
 
     for bus in buses:
         x, y, w, h = bus
-        cv2.rectangle(new_frame, (x, y), (x + w, y + h), colors['bus'], 2)
-        cv2.putText(new_frame, "Bus", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, colors['bus'], 2)
+        cv2.rectangle(new_frame, (x, y), (x + w, y + h), COLOR_GREEN, 2)
+        cv2.putText(new_frame, "Bus", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_GREEN, 2)
 
     for truck in trucks:
         x, y, w, h = truck
-        cv2.rectangle(new_frame, (x, y), (x + w, y + h), colors['truck'], 2)
-        cv2.putText(new_frame, "Truck", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, colors['truck'], 2)
+        cv2.rectangle(new_frame, (x, y), (x + w, y + h), COLOR_ORANGE, 2)
+        cv2.putText(new_frame, "Truck", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_ORANGE, 2)
 
     cv2.imshow("Parking Lot", new_frame)
     if cv2.waitKey(32) == ord("q"):

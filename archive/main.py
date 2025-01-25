@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 
 rpi_path = "/home/parkai/Downloads/parking-lot.mp4"
-git_path = "media/parking-lot.mp4"
+git_path = "../media/videos/parking-lot.mp4"
 cap = cv2.VideoCapture(git_path)
 with open("cparkyt", 'rb') as f:
     points = pickle.load(f)
