@@ -13,7 +13,11 @@ models = {
     "yolo11x": "models/yolo11x.pt",
 }
 
-env = input("Choose the device(PC or RPI): ")
+while True:
+    env = input("Choose the device (PC or RPI): ").strip().lower()
+    if env in ["pc", "rpi"]:
+        break
+    print("Invalid input. Please enter 'pc' or 'rpi'.")
 
 print("Available YOLO models:")
 for i, (name, path) in enumerate(models.items(), 1):
@@ -35,9 +39,11 @@ print(f"Selected model: {selected_model_name} ({model_path})")
 
 model = YOLO(model_path)
 
-cap = cv2.VideoCapture(rpi_path if 'rpi' in env.lower() else git_path)
+video_path = rpi_path if "rpi" in env else git_path
 
-print(f"Processing video from: {rpi_path if 'rpi' in env.lower() else git_path}")
+cap = cv2.VideoCapture(video_path)
+
+print(f"Processing video from: {video_path}")
 
 def motion_tracker(frame):
     results = model(frame)
