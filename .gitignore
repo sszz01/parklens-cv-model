@@ -167,3 +167,4 @@ yolo11n_ncnn_model/
 *.avi
 *.mov
 /.venv1/
+env_vars/

@@ -1,10 +1,17 @@
 import cv2
+import os
 from ultralytics import YOLO
 from data.colors import *
+from dotenv import load_dotenv
+
+load_dotenv("../env_vars/.env")
+camera_url = os.getenv("CAMERA_URL") # works on school wifi only
+
+if not camera_url:
+    raise ValueError("CAMERA_URL is not set in .env file or environment")
 
 rpi_path = "/home/parkai/Downloads/parking-lot.mp4"
 git_path = "../media/videos/parking-lot.mp4"
-camera_url = "rtmp://192.168.1.2/bcs/channel0_main.bcs?channel=0&stream=0&user=admin&password=zavaliBober$" # works on school wifi only
 
 models = {
     "yolo11n_ncnn": "./yolo11n_ncnn_model",
