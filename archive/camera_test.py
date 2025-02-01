@@ -53,8 +53,10 @@ cap = cv2.VideoCapture(video_path)
 
 print(f"Processing video from: {video_path}")
 
+video_writer = cv2.VideoWriter("../media/videos/output/motion_detection.mov", cv2.VideoWriter_fourcc(*"mp4v"), 30, (640, 480))
+
 def motion_tracker(frame):
-    results = model(frame)
+    results = model(frame, verbose=False)
 
     # lists of detected objects
     people = []
@@ -85,6 +87,7 @@ while True:
         cv2.putText(new_frame, "Person", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_ORANGE, 2)
 
     cv2.imshow("Frame", new_frame)
+    video_writer.write(new_frame)
     if cv2.waitKey(32) == ord("q"):
         break
 cap.release()
