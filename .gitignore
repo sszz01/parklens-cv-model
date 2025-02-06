@@ -168,3 +168,4 @@ yolo11n_ncnn_model/
 *.mov
 /.venv1/
 env_vars/
+test.py
