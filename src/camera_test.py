@@ -1,17 +1,18 @@
 import cv2
 import os
+import subprocess
 from ultralytics import YOLO
 from data.colors import *
 from dotenv import load_dotenv
+from freshest_frame import FreshestFrame
 
 load_dotenv("../env_vars/.env")
-camera_url = os.getenv("CAMERA_URL") # works on school wifi only
+camera_url = os.getenv("CAMERA_URL_RTMP") # works on school wifi only
 
 if not camera_url:
     raise ValueError("CAMERA_URL is not set in .env file or environment")
 
-rpi_path = "/home/parkai/Downloads/parking-lot.mp4"
-git_path = "../media/videos/parking-lot.mp4"
+rtmp_url = os.getenv("RAPI_URL_RTMP")
 
 models = {
     "yolo11n_ncnn": "./yolo11n_ncnn_model",
@@ -20,12 +21,6 @@ models = {
     "yolo11m": "models/yolo11m.pt",
     "yolo11x": "models/yolo11x.pt",
 }
-
-while True:
-    env = input("Choose the device (PC, RPI or Camera): ").strip().lower()
-    if env in ["pc", "rpi", "camera"]:
-        break
-    print("Invalid input. Please enter 'pc', 'rpi' or 'camera.")
 
 print("Available YOLO models:")
 for i, (name, path) in enumerate(models.items(), 1):
@@ -36,7 +31,7 @@ choice = input("Enter the number of the model you want to use (default: 1): ") o
 try:
     selected_model_name = list(models.keys())[int(choice) - 1]
     if selected_model_name.endswith("_ncnn"):
-        model = YOLO("yolo11n_ncnn_model/yolo11n.pt")
+        model = YOLO("../archive/yolo11n_ncnn_model/yolo11n.pt")
         model.export(format="ncnn")
 except (IndexError, ValueError):
     print("Invalid choice. Defaulting to the first model.")
@@ -47,14 +42,48 @@ print(f"Selected model: {selected_model_name} ({model_path})")
 
 model = YOLO(model_path)
 
-video_path = rpi_path if "rpi" in env else git_path if "pc" in env else camera_url
+cap = cv2.VideoCapture(camera_url, cv2.CAP_FFMPEG)
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
-cap = cv2.VideoCapture(video_path)
+fresh_frame = FreshestFrame(cap)
 
-print(f"Processing video from: {video_path}")
+if not cap.isOpened():
+    print("Error: Could not open video stream.")
+    exit()
 
-video_writer = cv2.VideoWriter("../media/videos/output/motion_detection.mov", cv2.VideoWriter_fourcc(*"mp4v"), 30, (640, 480))
+print(f"Processing video from: {camera_url}")
 
+# start the ffmpeg process with optimized params for low latency
+ffmpeg_process = subprocess.Popen(
+    [
+        "ffmpeg",
+        "-y",
+        "-f", "rawvideo",
+        "-vcodec", "rawvideo",
+        "-pix_fmt", "bgr24",
+        "-s", "640x480",
+        "-r", "20",
+        "-i", "-",
+        "-c:v", "libx264",
+        "-g", "10",
+        "-preset", "ultrafast",
+        "-tune", "zerolatency",
+        "-b:v", "256k",
+        "-maxrate", "256k",
+        "-bufsize", "512k",
+        "-f", "flv",
+        "-probesize", "32",
+        "-analyzeduration", "0",
+        "-fflags", "nobuffer",
+        "-flags", "low_delay",
+        "-avioflags", "direct",
+        "-strict", "experimental",
+        rtmp_url
+    ],
+    stdin=subprocess.PIPE
+)
+
+# function to track people
 def motion_tracker(frame):
     results = model(frame, verbose=False)
 
@@ -71,26 +100,34 @@ def motion_tracker(frame):
 
     return people
 
+frame_counter = 0
+
 while True:
-    success, frame = cap.read()
-    if not success:
+    frame_counter, frame = fresh_frame.read(seqnumber=frame_counter + 1)
+    if fresh_frame is None:
         break
 
     new_frame = cv2.resize(frame, (640, 480))
     people = motion_tracker(new_frame)
 
     # drawing rectangles around detected objects
-
     for person in people:
         x, y, w, h = person
         cv2.rectangle(new_frame, (x, y), (x + w, y + h), COLOR_RED, 5)
         cv2.putText(new_frame, "Person", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_ORANGE, 2)
 
     cv2.imshow("Frame", new_frame)
-    video_writer.write(new_frame)
-    if cv2.waitKey(32) == ord("q"):
+    try:
+        ffmpeg_process.stdin.write(new_frame.tobytes())
+    except BrokenPipeError:
+        print("FFmpeg process broke. Exiting...")
         break
-cap.release()
-cv2.destroyAllWindows()
 
-print("Video processing completed.")
+    if cv2.waitKey(1) == ord("q"):
+        break
+
+cap.release()
+fresh_frame.release()
+ffmpeg_process.stdin.close()
+ffmpeg_process.wait()
+cv2.destroyAllWindows()
