@@ -46,7 +46,7 @@ except (IndexError, ValueError):
 model_path = models[selected_model_name]
 print(f"Selected model: {selected_model_name} ({model_path})")
 
-model = YOLO(model_path)
+model = YOLO(model_path, verbose=False)
 
 video_path = git_path if "pc" in env else camera_url
 

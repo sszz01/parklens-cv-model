@@ -68,9 +68,9 @@ ffmpeg_process = subprocess.Popen(
         "-g", "10",
         "-preset", "ultrafast",
         "-tune", "zerolatency",
-        "-b:v", "256k",
-        "-maxrate", "256k",
-        "-bufsize", "512k",
+        "-b:v", "512k",
+        "-maxrate", "512k",
+        "-bufsize", "256k",
         "-f", "flv",
         "-probesize", "32",
         "-analyzeduration", "0",
@@ -78,6 +78,7 @@ ffmpeg_process = subprocess.Popen(
         "-flags", "low_delay",
         "-avioflags", "direct",
         "-strict", "experimental",
+        "-rtbufsize", "64M",
         rtmp_url
     ],
     stdin=subprocess.PIPE
@@ -88,7 +89,7 @@ def motion_tracker(frame):
     results = model(frame, verbose=False)
 
     # lists of detected objects
-    people = []
+    people, cars = [], []
 
     # loop over detected objects
     for result in results[0].boxes:
@@ -97,8 +98,10 @@ def motion_tracker(frame):
 
         if cls == 0:
             people.append((int(x - w / 2), int(y - h / 2), int(w), int(h)))
+        elif cls == 2:
+            cars.append((int(x - w / 2), int(y - h / 2), int(w), int(h)))
 
-    return people
+    return people, cars
 
 frame_counter = 0
 
@@ -108,21 +111,26 @@ while True:
         break
 
     new_frame = cv2.resize(frame, (640, 480))
-    people = motion_tracker(new_frame)
+    people, cars = motion_tracker(new_frame)
 
     # drawing rectangles around detected objects
     for person in people:
         x, y, w, h = person
         cv2.rectangle(new_frame, (x, y), (x + w, y + h), COLOR_RED, 5)
         cv2.putText(new_frame, "Person", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_ORANGE, 2)
+    for car in cars:
+        x, y, w, h = car
+        cv2.rectangle(new_frame, (x, y), (x + w, y + h), COLOR_RED, 2)
+        cv2.putText(new_frame, "Car", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_TEAL, 2)
 
-    cv2.imshow("Frame", new_frame)
+    cv2.imshow("Frame1", new_frame)
     try:
         ffmpeg_process.stdin.write(new_frame.tobytes())
     except BrokenPipeError:
         print("FFmpeg process broke. Exiting...")
         break
 
+    # press q to quit
     if cv2.waitKey(1) == ord("q"):
         break
 
