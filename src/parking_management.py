@@ -4,6 +4,7 @@ from ultralytics import solutions, YOLO
 from data.colors import *
 from dotenv import load_dotenv
 from custom_parking_management import CustomParkingManagement
+from coordinates_picker import CustomParkingPtsSelection
 from freshest_frame import FreshestFrame
 
 polygon_json_path = "bounding_boxes.json"
@@ -61,6 +62,9 @@ if env == "camera":
     fresh_frame = FreshestFrame(cap)
 else:
     fresh_frame = None # the local video is used instead
+
+if not os.path.exists(polygon_json_path):
+    CustomParkingPtsSelection("Select parking ROI", 1980, 1080)
 
 def motion_tracker(frame):
     results = model(frame, verbose=False)
