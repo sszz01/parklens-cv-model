@@ -3,11 +3,16 @@
 ## Overview
 ParkLens-Model is a computer vision model designed to analyze video footage of parking lots to identify empty and occupied parking spots. It is a second repository of the ParkLens-AI App, that is used to store folders for the model. 
 
+**Note: This repository goes along with the parking app, the repository of which can be found here: https://github.com/sszz01/ParkLens-AI.
+This guide is for the CV model development only, please refer to other repo for Swift and iOS setup guidelines.**
+
+
+
 ## Features
-**Real-time Object Detection – Detects cars, motorcycles, buses, and trucks.**
-**Vehicle Tracking – YOLOv11 classification**
-**Parking Management – Determines available and occupied parking spots.**
-**Live Stream Support – Works with both recorded videos and real-time camera feeds (soon about to me camera-only)**
+**Real-time Object Detection – Detects cars, motorcycles, buses, and trucks.**<br>
+**Vehicle Tracking – YOLOv11 classification.**<br>
+**Parking Management – Determines available and occupied parking spots.**<br>
+**Live Stream Support – Works with both recorded videos and real-time camera feeds (soon about to me camera-only).**<br>
 
 
 ## ⚙️ Installation  
@@ -30,16 +35,17 @@ You must have OpenCV and Ultralytics installed for the project to be build.
 CAMERA_URL_RTMP=your_camera_rtmp_link
 ```
 ## 🚀 Usage
-▶️ Run the Model
+▶️ **Run the Model**
 ```bash
 python src/parking_management.py
 ```
 
-You will be asked to select
+As input, select either:
 - PC (to use a local video file)
 - Camera (to use an RTMP/RTSP stream)
 
-You will then be asked to choose a YOLO model from the available options.
+After video input is specified, select regions of interest by using TKinter GUI and clicking around the corners of the region to create a polygon.
+Then save your preferences by clicking "Save" button and proceed by choosing a YOLO model from the available options.
 
-To exit, simply press Q while the video window is open.
+*To exit, simply press Q while the video window is open.*
 
