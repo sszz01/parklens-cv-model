@@ -7,22 +7,17 @@ class CustomParkingPtsSelection(ParkingPtsSelection):
 
         self.tk, self.filedialog, self.messagebox = tk, filedialog, messagebox
         self.master = self.tk.Tk()
-        self.master.title(canvas_name)  # Override window title
+        self.master.title(canvas_name)
         self.master.resizable(False, False)
-
-        # Override canvas size before initialization
         self.canvas_max_width, self.canvas_max_height = canvas_width, canvas_height
-
         self.canvas = self.tk.Canvas(self.master, bg="white", width=self.canvas_max_width,
                                      height=self.canvas_max_height)
         self.canvas.pack(side=self.tk.BOTTOM)
-
         self.image = None
         self.canvas_image = None
         self.rg_data, self.current_box = [], []
         self.imgw = self.imgh = 0
 
-        # Button frame
         button_frame = self.tk.Frame(self.master)
         button_frame.pack(side=self.tk.TOP)
 
