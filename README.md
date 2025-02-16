@@ -4,10 +4,10 @@
 ParkLens-Model is a computer vision model designed to analyze video footage of parking lots to identify empty and occupied parking spots. It is a second repository of the ParkLens-AI App, that is used to store folders for the model. 
 
 ## Features
-✅ Real-time Object Detection – Detects cars, motorcycles, buses, and trucks.
-✅ Vehicle Tracking – YOLOv11 classification
-✅ Parking Management – Determines available and occupied parking spots.
-✅ Live Stream Support – Works with both recorded videos and real-time camera feeds (soon about to me camera-only)
+✅ **Real-time Object Detection – Detects cars, motorcycles, buses, and trucks.**\n
+✅ **Vehicle Tracking – YOLOv11 classification**\n
+✅ **Parking Management – Determines available and occupied parking spots.**\n
+✅ **Live Stream Support – Works with both recorded videos and real-time camera feeds (soon about to me camera-only)**\n
 
 
 ## ⚙️ Installation  
@@ -25,12 +25,12 @@ pip install -r requirements.txt
 ```
 You must have OpenCV and Ultralytics installed for the project to be build.
 
-# Before running the model, create a .env file and add your camera feed URL:
+Before running the model, create a .env file and add your camera feed URL:
 ```bash
 CAMERA_URL_RTMP=your_camera_rtmp_link
 ```
 ## 🚀 Usage
-# ▶️ Run the Model
+▶️ Run the Model
 ```bash
 python src/parking_management.py
 ```
