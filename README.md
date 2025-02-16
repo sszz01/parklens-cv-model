@@ -4,8 +4,8 @@
 ParkLens-Model is a computer vision model designed to analyze video footage of parking lots to identify empty and occupied parking spots. It is a second repository of the ParkLens-AI App that is used to store folders for the model.
 <br>
 
-**Note: This repository goes along with the parking app, the repository of which can be found here: https://github.com/sszz01/ParkLens-AI.<br>
-This guide is for the CV model development only, please refer to other repo for Swift and iOS setup guidelines.**
+**Note: This repository goes along with the parking app, the repository of which can be found here: https://github.com/sszz01/ParkLens-AI.<br><br>
+This guide is for the CV model development only. Please refer to other repo for Swift and iOS setup guidelines.**
 
 
 
