@@ -29,8 +29,9 @@ Make sure you have Python 3.1+ installed, then run:
 ```bash
 pip install -r requirements.txt
 ```
-You must have at least OpenCV and Ultralytics installed for the project to be built.
-<br>
+You must have at least OpenCV and Ultralytics installed for the project to be built.<br>
+
+
 **Before running the model, create a .env file and add your camera feed URL**:
 ```bash
 CAMERA_URL_RTMP=your_camera_rtmp_link
