@@ -1,6 +1,4 @@
 # COLORS IN BGR
-from tensorflow.python.debug.cli.cli_shared import COLOR_WHITE
-
 COLOR_RED = (0, 0, 255)  # Car
 COLOR_BLUE = (255, 0, 0)  # Motorcycle
 COLOR_GREEN = (0, 255, 0)  # Bus (remains the same)

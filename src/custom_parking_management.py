@@ -1,6 +1,7 @@
 import cv2
 import json
 import numpy as np
+from shapely.geometry import Polygon
 from ultralytics.solutions import ParkingManagement
 from data.colors import *
 from ultralytics.utils.plotting import Annotator
@@ -29,6 +30,21 @@ def draw_vehicles(motion_tracker, frame):
         cv2.putText(frame, "Truck", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_WHITE, 2)
     return frame
 
+def calculate_iou(park_spot_polygon, vehicle_bbox):
+    # Create a Polygon for the vehicle's bounding box
+    vehicle_polygon = Polygon([(vehicle_bbox[0], vehicle_bbox[1]),
+                               (vehicle_bbox[0] + vehicle_bbox[2], vehicle_bbox[1]),
+                               (vehicle_bbox[0] + vehicle_bbox[2], vehicle_bbox[1] + vehicle_bbox[3]),
+                               (vehicle_bbox[0], vehicle_bbox[1] + vehicle_bbox[3])])
+
+    # Calculate the intersection and union of the parking spot and vehicle polygon
+    intersection_area = park_spot_polygon.intersection(vehicle_polygon).area
+    union_area = park_spot_polygon.union(vehicle_polygon).area
+
+    # Return the Intersection over Union (IoU)
+    if union_area == 0:
+        return 0  # Avoid division by zero
+    return intersection_area / union_area
 
 class CustomParkingManagement(ParkingManagement):
     def __init__(self, motion_tracker, **kwargs):
@@ -44,7 +60,7 @@ class CustomParkingManagement(ParkingManagement):
         with open(self.json_file) as f:
             self.json = json.load(f)
 
-        self.pr_info = {"Occupancy": 0, "Available": len(self.json)}  # Start with all available
+        self.pr_info = {"Occupied": 0, "Available": len(self.json)}
         self.motion_tracker = motion_tracker
         self.arc = COLOR_GREEN
         self.occ = COLOR_RED
@@ -53,18 +69,19 @@ class CustomParkingManagement(ParkingManagement):
         self.extract_tracks(frame)
         total_spots = len(self.json)
         occupied_spots = 0
-        detected_vehicles = sum(self.motion_tracker(frame), [])
+        detected_vehicles = []
+        for obj_list in self.motion_tracker(frame):
+            detected_vehicles.extend(obj_list)
         annotator = Annotator(frame, self.line_width)
-
-        frame = draw_vehicles(self.motion_tracker, frame)
 
         for region in self.json:
             pts_array = np.array(region["points"], dtype=np.int32).reshape((-1, 1, 2))
+            park_spot_polygon = Polygon([(pt[0], pt[1]) for pt in region["points"]])
             is_occupied = False
             for (x, y, w, h) in detected_vehicles:
-                xc, yc = x + w // 2, y + h // 2
-                if cv2.pointPolygonTest(pts_array, (xc, yc), False) >= 0:
-                    annotator.display_objects_labels(frame, "Vehicle", (104, 31, 17), (255, 255, 255), xc, yc, 10)
+                vehicle_bbox = (x, y, w, h)
+                iou = calculate_iou(park_spot_polygon, vehicle_bbox)
+                if iou > 0.25:
                     is_occupied = True
                     break
             cv2.polylines(frame, [pts_array], isClosed=True, color=self.occ if is_occupied else self.arc, thickness=3)
