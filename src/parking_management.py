@@ -1,7 +1,6 @@
 import cv2
 import os
 from ultralytics import solutions, YOLO
-from data.colors import *
 from dotenv import load_dotenv
 from custom_parking_management import CustomParkingManagement
 from coordinates_picker import CustomParkingPtsSelection
@@ -54,7 +53,6 @@ video_path = git_path if "pc" in env else camera_url
 cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 assert cap.isOpened(), f"Error reading {video_path}"
-print(f"Processing video from: {video_path}")
 
 # w, h, fps = (int(cap.get(x)) for x in (cv2.CAP_PROP_FRAME_WIDTH, cv2.CAP_PROP_FRAME_HEIGHT, cv2.CAP_PROP_FPS))
 
@@ -64,7 +62,10 @@ else:
     fresh_frame = None # the local video is used instead
 
 if not os.path.exists(polygon_json_path):
+    print("BBoxes were not found. Please open appeared Tkinter window and save the coordinates to the file.")
     CustomParkingPtsSelection("Select parking ROI", 1980, 1080)
+
+print(f"Processing video from: {video_path}")
 
 def motion_tracker(frame):
     results = model(frame, verbose=False)
@@ -94,7 +95,7 @@ def motion_tracker(frame):
 parking_manager = CustomParkingManagement(
     model=model_path,  # path to model file
     json_file=polygon_json_path, # path to parking annotations file
-    motion_tracker=motion_tracker # path to vehicle detection function
+    motion_tracker=motion_tracker
 )
 
 frame_counter = 0
@@ -109,34 +110,8 @@ while True:
         if not success:
             break
 
-    new_frame = cv2.resize(frame, (640, 480))
-    results = model.track(new_frame, persist=True, show=False)
-
-    cars, motorcycles, buses, trucks = motion_tracker(new_frame)
-
-    # loop over detected objects and draw bboxes around them
-    for car in cars:
-        x, y, w, h = car
-        cv2.rectangle(new_frame, (x, y), (x + w, y + h), COLOR_RED, 2)
-        cv2.putText(new_frame, "Car", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_TEAL, 2)
-
-    for motorcycle in motorcycles:
-        x, y, w, h = motorcycle
-        cv2.rectangle(new_frame, (x, y), (x + w, y + h), COLOR_BLUE, 2)
-        cv2.putText(new_frame, "Motorcycle", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_YELLOW, 2)
-
-    for bus in buses:
-        x, y, w, h = bus
-        cv2.rectangle(new_frame, (x, y), (x + w, y + h), COLOR_GREEN, 2)
-        cv2.putText(new_frame, "Bus", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_MAGENTA, 2)
-
-    for truck in trucks:
-        x, y, w, h = truck
-        cv2.rectangle(new_frame, (x, y), (x + w, y + h), COLOR_ORANGE, 2)
-        cv2.putText(new_frame, "Truck", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_WHITE, 2)
-
+    new_frame = cv2.resize(frame, (1280, 720))
     new_frame = parking_manager.process_data(new_frame)
-
     cv2.imshow("Parking Lot", new_frame)
 
     # exit on pressing Q
