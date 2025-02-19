@@ -47,6 +47,7 @@ model_path = models[selected_model_name]
 print(f"Selected model: {selected_model_name} ({model_path})")
 
 model = YOLO(model_path, verbose=False)
+model.export(format="coreml")
 
 video_path = git_path if "pc" in env else camera_url
 
@@ -110,8 +111,8 @@ while True:
         if not success:
             break
 
-    new_frame = cv2.resize(frame, (1280, 720))
-    new_frame = parking_manager.process_data(new_frame)
+    new_frame = parking_manager.process_data(frame)
+    new_frame = cv2.resize(new_frame, (1280, 720))
     cv2.imshow("Parking Lot", new_frame)
 
     # exit on pressing Q
