@@ -1,0 +1,12 @@
+services:
+  nginx-rtmp:
+    build: .
+    image: sz01/parkai-nginx:v1
+    container_name: nginx-rtmp-hls-server
+    ports:
+      - "8554:8554" # rtmp port
+      - "8080:8080" # hls port
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./hls:/hls   # local directory to store hls files
+    restart: always
