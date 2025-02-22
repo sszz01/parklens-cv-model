@@ -74,6 +74,8 @@ class CustomParkingManagement(ParkingManagement):
             detected_vehicles.extend(obj_list)
         annotator = Annotator(frame, self.line_width)
 
+        frame = draw_vehicles(self.motion_tracker, frame)
+
         for region in self.json:
             pts_array = np.array(region["points"], dtype=np.int32).reshape((-1, 1, 2))
             park_spot_polygon = Polygon([(pt[0], pt[1]) for pt in region["points"]])
@@ -87,7 +89,7 @@ class CustomParkingManagement(ParkingManagement):
             cv2.polylines(frame, [pts_array], isClosed=True, color=self.occ if is_occupied else self.arc, thickness=3)
             if is_occupied:
                 occupied_spots += 1
-        self.pr_info["Occupancy"] = occupied_spots
+        self.pr_info["Occupied"] = occupied_spots
         self.pr_info["Available"] = total_spots - occupied_spots
         annotator.display_analytics(frame, self.pr_info, (104, 31, 17), (255, 255, 255), 10)
 
