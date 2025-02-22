@@ -6,6 +6,11 @@ from custom_parking_management import CustomParkingManagement
 from coordinates_picker import CustomParkingPtsSelection
 from freshest_frame import FreshestFrame
 
+#TODO fix bboxes being drawn when camera mode is selected
+#TODO fix bug where bboxes from the old video are drawn on the new video
+#TODO setup docker container for nginx server
+#TODO add user-specified res option?
+
 polygon_json_path = "bounding_boxes.json"
 git_path = "../media/videos/parking-lot.mp4"
 load_dotenv("../env_vars/.env")
@@ -112,7 +117,7 @@ while True:
             break
 
     new_frame = parking_manager.process_data(frame)
-    new_frame = cv2.resize(new_frame, (1280, 720))
+    new_frame = cv2.resize(new_frame, (640, 480))
     cv2.imshow("Parking Lot", new_frame)
 
     # exit on pressing Q
