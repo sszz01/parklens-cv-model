@@ -134,8 +134,9 @@ while True:
     if cv2.waitKey(1) == ord("q"):
         break
 
+if fresh_frame is not None:
+    fresh_frame.release()
 cap.release()
-fresh_frame.release()
 ffmpeg_process.stdin.close()
 ffmpeg_process.wait()
 cv2.destroyAllWindows()

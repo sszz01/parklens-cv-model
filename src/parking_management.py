@@ -1,15 +1,15 @@
 import cv2
 import os
+import time
 from ultralytics import solutions, YOLO
 from dotenv import load_dotenv
 from custom_parking_management import CustomParkingManagement
 from coordinates_picker import CustomParkingPtsSelection
 from freshest_frame import FreshestFrame
+from data.colors import *
 
 #TODO fix polygons being drawn when camera mode is selected
 #TODO fix bug where polygons from the old video are drawn on the new video
-#TODO setup docker container for nginx server
-#TODO add user-specified res option?
 #TODO add fps option
 #TODO put labels around vehicles instead of bboxes
 
@@ -52,6 +52,23 @@ except (IndexError, ValueError):
 
 model_path = models[selected_model_name]
 print(f"Selected model: {selected_model_name} ({model_path})")
+
+def get_valid_input(prompt, lower, upper):
+    while True:
+        try:
+            value = int(input(prompt))
+            if lower <= value <= upper:
+                return value
+            else:
+                print(f"Invalid input. Please enter a value between {lower} and {upper}")
+        except ValueError:
+            print("Invalid input. Please enter a valid integer.")
+
+width = get_valid_input("Enter the width of the frame (in pixels): ", 640, 1980) or 640 # set 640 by default
+height = get_valid_input("Enter the height of the frame (in pixels): ", 480, 1080) or 480 # set 480 by default
+
+stream_res = (width, height)
+print(f"Selected resolution: {stream_res}")
 
 model = YOLO(model_path, verbose=False)
 model.export(format="coreml")
@@ -107,6 +124,9 @@ parking_manager = CustomParkingManagement(
 )
 
 frame_counter = 0
+fps_counter = 0
+fps = 0
+prev_time = time.time()
 
 while True:
     if fresh_frame is not None:
@@ -119,13 +139,22 @@ while True:
             break
 
     new_frame = parking_manager.process_data(frame)
-    new_frame = cv2.resize(new_frame, (640, 480))
+    new_frame = cv2.resize(new_frame, stream_res)
+
+    fps_counter += 1
+    if fps_counter % 5 == 0:
+        curr_time = time.time()
+        fps = 5 / (curr_time - prev_time)
+        prev_time = curr_time
+
+    cv2.putText(new_frame, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, COLOR_GREEN, 2)
     cv2.imshow("Parking Lot", new_frame)
 
     # exit on pressing Q
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
-fresh_frame.release()
+if fresh_frame is not None:
+    fresh_frame.release()
 cap.release()
 cv2.destroyAllWindows()
