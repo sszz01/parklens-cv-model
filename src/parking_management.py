@@ -8,21 +8,16 @@ from coordinates_picker import CustomParkingPtsSelection
 from freshest_frame import FreshestFrame
 from data.colors import *
 
-#TODO fix polygons being drawn when camera mode is selected
-#TODO fix bug where polygons from the old video are drawn on the new video
-#TODO add fps option
 #TODO put labels around vehicles instead of bboxes
 
 polygon_json_path = "bounding_boxes.json"
-git_path = "../media/videos/parking-lot.mp4"
+mp4_path = "../media/videos/parking-lot.mp4"
 load_dotenv("../env_vars/.env")
 camera_url = os.getenv("CAMERA_URL_RTMP") # choose RTMP or RTSP
-
 if not camera_url:
     raise ValueError("CAMERA_URL is not set in .env file or environment")
 
 models = {
-    "yolo11n_ncnn": "./yolo11n_ncnn_model",
     "yolo11n": "models/yolo11n.pt",
     "yolo11s": "models/yolo11s.pt",
     "yolo11m": "models/yolo11m.pt",
@@ -43,9 +38,6 @@ choice = input("Enter the number of the model you want to use (default: 1): ") o
 
 try:
     selected_model_name = list(models.keys())[int(choice) - 1]
-    if selected_model_name.endswith("_ncnn"):
-        model = YOLO("yolo11n_ncnn_model/yolo11n.pt")
-        model.export(format="ncnn")
 except (IndexError, ValueError):
     print("Invalid choice. Defaulting to the first model.")
     selected_model_name = list(models.keys())[0]
@@ -73,7 +65,7 @@ print(f"Selected resolution: {stream_res}")
 model = YOLO(model_path, verbose=False)
 model.export(format="coreml")
 
-video_path = git_path if "pc" in env else camera_url
+video_path = mp4_path if "pc" in env else camera_url
 
 cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
