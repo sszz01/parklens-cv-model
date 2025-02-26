@@ -40,7 +40,7 @@ CAMERA_URL_RTMP=your_camera_rtmp_link
 ## 🚀 Usage
 ▶️ **Run the Model**
 ```bash
-python src/parking_management.py
+python src/main.py
 ```
 
 As input, select either:

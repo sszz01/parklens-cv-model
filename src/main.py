@@ -1,14 +1,21 @@
 import cv2
 import os
 import time
+
 from ultralytics import solutions, YOLO
 from dotenv import load_dotenv
+
 from custom_parking_management import CustomParkingManagement
 from coordinates_picker import CustomParkingPtsSelection
 from freshest_frame import FreshestFrame
 from data.colors import *
 
+#TODO train model on parking spaces dataset
+#TODO employ model on our custom video
+#TODO somehow get the bounding boxes and save it to json?
 #TODO put labels around vehicles instead of bboxes
+#TODO set option where user can update json file
+#TODO optimize/cleanup code
 
 polygon_json_path = "bounding_boxes.json"
 mp4_path = "../media/videos/parking-lot.mp4"
@@ -27,6 +34,12 @@ models = {
 while True:
     env = input("Choose the device (PC or Camera): ").strip().lower()
     if env in ["pc", "camera"]:
+        if not os.path.exists(polygon_json_path):
+            print("BBoxes were not found. Please open appeared Tkinter window and save the coordinates to the file.")
+            picker = CustomParkingPtsSelection("Select parking ROI", 1980, 1080)
+        bbox_upd = bool(input("Update bboxes? (y/n): ").strip().lower() == "y")
+        if bbox_upd:
+            picker = CustomParkingPtsSelection("Select parking ROI", 1980, 1080)
         break
     print("Invalid input. Please enter 'pc' or 'camera'.")
 
@@ -63,6 +76,7 @@ stream_res = (width, height)
 print(f"Selected resolution: {stream_res}")
 
 model = YOLO(model_path, verbose=False)
+# exports to coreml(macos debugging only)
 model.export(format="coreml")
 
 video_path = mp4_path if "pc" in env else camera_url
@@ -78,14 +92,18 @@ if env == "camera":
 else:
     fresh_frame = None # the local video is used instead
 
-if not os.path.exists(polygon_json_path):
-    print("BBoxes were not found. Please open appeared Tkinter window and save the coordinates to the file.")
-    CustomParkingPtsSelection("Select parking ROI", 1980, 1080)
-
 print(f"Processing video from: {video_path}")
 
+def get_results(frame):
+    return model(frame, verbose=False)
+
+def get_parking_spaces(frame):
+    results = get_results(frame)
+
+    parking_spaces = []
+
 def motion_tracker(frame):
-    results = model(frame, verbose=False)
+    results = get_results(frame)
 
     cars = []
     motorcycles = []
