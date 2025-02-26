@@ -4,9 +4,9 @@ import subprocess
 from ultralytics import YOLO
 from data.colors import *
 from dotenv import load_dotenv
-from freshest_frame import FreshestFrame
+from ..freshest_frame import FreshestFrame
 
-load_dotenv("../env_vars/.env")
+load_dotenv("../../env_vars/.env")
 camera_url = os.getenv("CAMERA_URL_RTMP") # works on school wifi only
 
 if not camera_url:
