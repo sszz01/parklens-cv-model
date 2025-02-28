@@ -77,7 +77,7 @@ print(f"Selected resolution: {stream_res}")
 
 model = YOLO(model_path, verbose=False)
 # exports to coreml(macos debugging only)
-model.export(format="coreml")
+model.export(format="coreml", imgsz=640, device="mps", half=True)
 
 video_path = mp4_path if "pc" in env else camera_url
 
@@ -95,7 +95,7 @@ else:
 print(f"Processing video from: {video_path}")
 
 def get_results(frame):
-    return model(frame, verbose=False)
+    return model(frame, device="mps",verbose=False)
 
 def get_parking_spaces(frame):
     results = get_results(frame)
