@@ -4,7 +4,7 @@ import subprocess
 from ultralytics import YOLO
 from data.colors import *
 from dotenv import load_dotenv
-from ..freshest_frame import FreshestFrame
+from src.freshest_frame import FreshestFrame
 
 load_dotenv("../../env_vars/.env")
 camera_url = os.getenv("CAMERA_URL_RTMP") # works on school wifi only
@@ -15,11 +15,10 @@ if not camera_url:
 rtmp_url = os.getenv("RAPI_URL_RTMP")
 
 models = {
-    "yolo11n_ncnn": "./yolo11n_ncnn_model",
-    "yolo11n": "models/yolo11n.pt",
-    "yolo11s": "models/yolo11s.pt",
-    "yolo11m": "models/yolo11m.pt",
-    "yolo11x": "models/yolo11x.pt",
+    "yolo11n": "../models/yolo11n.pt",
+    "yolo11s": "../models/yolo11s.pt",
+    "yolo11m": "../models/yolo11m.pt",
+    "yolo11x": "../models/yolo11x.pt",
 }
 
 print("Available YOLO models:")
@@ -42,8 +41,8 @@ print(f"Selected model: {selected_model_name} ({model_path})")
 
 model = YOLO(model_path)
 
-cap = cv2.VideoCapture(camera_url, cv2.CAP_FFMPEG)
-cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+cap = cv2.VideoCapture(0)
+# cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
 fresh_frame = FreshestFrame(cap)
 
