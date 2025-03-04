@@ -13,11 +13,14 @@ from coordinates_picker import CustomParkingPtsSelection
 from freshest_frame import FreshestFrame
 from data.colors import *
 
+# Training
 #TODO train model on parking spaces dataset
 #TODO employ model on our custom video
 #TODO somehow get the bounding boxes and save it to json?
 
-#TODO set option where user can update json file
+# User Interface
+#TODO fix a bug where bounding boxes are not removed
+#TODO put labels around vehicles instead of bboxes
 #TODO optimize/cleanup code
 
 polygon_json_path = "bounding_boxes.json"

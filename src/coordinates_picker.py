@@ -1,6 +1,5 @@
 import json
 import os
-
 import cv2
 from ultralytics.solutions import ParkingPtsSelection
 
@@ -21,19 +20,26 @@ class CustomParkingPtsSelection(ParkingPtsSelection):
         self.canvas_image = None
         self.rg_data, self.current_box = [], []
         self.imgw = self.imgh = 0
-        self.polygon_json_path = polygon_json_path
+        self.polygon_json_path = polygon_json_path if polygon_json_path else "bounding_boxes.json"
 
         button_frame = self.tk.Frame(self.master)
         button_frame.pack(side=self.tk.TOP)
 
         for text, cmd in [
             ("Remove Last BBox", self.remove_last_bounding_box),
+            ("Remove All BBoxes", self.remove_all_bounding_boxes),
             ("Save", self.custom_save_to_json),
         ]:
             self.tk.Button(button_frame, text=text, command=cmd).pack(side=self.tk.LEFT)
 
         if first_frame is not None:
             self.upload_image_from_frame(first_frame)
+
+        if os.path.exists(self.polygon_json_path):
+            with open(self.polygon_json_path, "r") as f:
+                self.rg_data = json.load(f)
+        else:
+            self.rg_data = []
 
         self.master.mainloop()
 
@@ -59,20 +65,25 @@ class CustomParkingPtsSelection(ParkingPtsSelection):
         self.rg_data.clear(), self.current_box.clear()
 
     def custom_save_to_json(self):
-        """Saves the bounding box data to a JSON file, merging with existing data."""
+        """Saves the bounding box data to a JSON file, ensuring no duplication."""
         if not self.rg_data:
             self.messagebox.showinfo("Info", "No bounding boxes to save.")
             return
+        json_data = [{"points": bbox} for bbox in self.rg_data]
 
-        # Load existing bboxes if the file exists
-        if os.path.exists(self.polygon_json_path):
-            with open(self.polygon_json_path, "r") as f:
-                existing_data = json.load(f)
-        else:
-            existing_data = []
-
-        existing_data.extend([{"points": bbox} for bbox in self.rg_data])
         with open(self.polygon_json_path, "w") as f:
-            json.dump(existing_data, f, indent=4)
+            json.dump(json_data, f, indent=4)
 
         self.messagebox.showinfo("Success", "Bounding boxes saved.")
+
+    def remove_all_bounding_boxes(self):
+        if not self.rg_data:
+            self.messagebox.showinfo("Info", "No bounding boxes to remove.")
+            return
+        self.rg_data.clear()
+
+        with open(self.polygon_json_path, "w", encoding="utf-8") as f:
+            json.dump([], f, indent=4)
+        self.canvas.delete("all")
+        self.canvas.create_image(0, 0, anchor=self.tk.NW, image=self.canvas_image)
+        self.messagebox.showinfo("Success", "All bounding boxes removed.")
