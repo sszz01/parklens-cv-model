@@ -1,9 +1,12 @@
 import cv2
 import os
 import time
+import json
+import numpy as np
 
 from ultralytics import solutions, YOLO
 from dotenv import load_dotenv
+from shapely.geometry import Polygon
 
 from custom_parking_management import CustomParkingManagement
 from coordinates_picker import CustomParkingPtsSelection
@@ -13,7 +16,7 @@ from data.colors import *
 #TODO train model on parking spaces dataset
 #TODO employ model on our custom video
 #TODO somehow get the bounding boxes and save it to json?
-#TODO put labels around vehicles instead of bboxes
+
 #TODO set option where user can update json file
 #TODO optimize/cleanup code
 
@@ -31,15 +34,34 @@ models = {
     "yolo11x": "models/yolo11x.pt",
 }
 
+uploaded = False
 while True:
     env = input("Choose the device (PC or Camera): ").strip().lower()
     if env in ["pc", "camera"]:
+        video_path = mp4_path if "pc" in env else camera_url
+        cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        assert cap.isOpened(), f"Error reading {video_path}"
+        ret, first_frame = cap.read()
+        if not ret:
+            print("Failed to read the first frame from the video.")
+            exit(1)
+
         if not os.path.exists(polygon_json_path):
             print("BBoxes were not found. Please open appeared Tkinter window and save the coordinates to the file.")
-            picker = CustomParkingPtsSelection("Select parking ROI", 1980, 1080)
-        bbox_upd = bool(input("Update bboxes? (y/n): ").strip().lower() == "y")
-        if bbox_upd:
-            picker = CustomParkingPtsSelection("Select parking ROI", 1980, 1080)
+            CustomParkingPtsSelection("Select parking ROI", 1980, 1080, first_frame)
+            uploaded = True
+
+        if not uploaded:
+            bbox_upd = bool(input("Update bboxes? (y/n): ").strip().lower() == "y")
+            if bbox_upd:
+                with open(polygon_json_path, 'r') as f:
+                    bbox_data = json.load(f)
+                for bbox in bbox_data:
+                    pts_array = np.array(bbox["points"], dtype=np.int32).reshape((-1, 1, 2))
+                    park_spot_polygon = Polygon([(pt[0], pt[1]) for pt in bbox["points"]])
+                    cv2.polylines(first_frame, [pts_array], isClosed=True, color=(255, 0, 0), thickness=3)
+                CustomParkingPtsSelection("Select parking ROI", 1980, 1080, first_frame, polygon_json_path)
         break
     print("Invalid input. Please enter 'pc' or 'camera'.")
 
@@ -78,14 +100,6 @@ print(f"Selected resolution: {stream_res}")
 model = YOLO(model_path, verbose=False)
 # exports to coreml(macos debugging only)
 model.export(format="coreml", imgsz=640, device="mps", half=True)
-
-video_path = mp4_path if "pc" in env else camera_url
-
-cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)
-cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-assert cap.isOpened(), f"Error reading {video_path}"
-
-# w, h, fps = (int(cap.get(x)) for x in (cv2.CAP_PROP_FRAME_WIDTH, cv2.CAP_PROP_FRAME_HEIGHT, cv2.CAP_PROP_FPS))
 
 if env == "camera":
     fresh_frame = FreshestFrame(cap)
@@ -138,7 +152,7 @@ fps_counter = 0
 fps = 0
 prev_time = time.time()
 
-while True:
+while cap.isOpened():
     if fresh_frame is not None:
         frame_counter, frame = fresh_frame.read(seqnumber=frame_counter + 1)
         if fresh_frame is None:
