@@ -15,7 +15,7 @@ from data.colors import *
 
 polygon_json_path = "bounding_boxes.json"
 mp4_path = "../media/videos/parking-lot.mp4"
-load_dotenv("../env_vars/.env")
+load_dotenv("../.env")
 camera_url = os.getenv("CAMERA_URL_RTMP") # choose RTMP or RTSP
 if not camera_url:
     raise ValueError("CAMERA_URL is not set in .env file or environment")
