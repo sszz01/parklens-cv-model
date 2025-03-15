@@ -33,10 +33,11 @@ pip install -r requirements.txt
 You must have at least OpenCV and Ultralytics installed for the project to be built.<br>
 
 
-**Before running the model, create a .env file and add your camera feed URL**:
+**Before running the model, edit project .env file and add your camera feed URL**:
 ```bash
 CAMERA_URL_RTMP=your_camera_rtmp_link
 ```
+*Note: Although you could, using an RTSP stream results in bigger latency and the quality of the video. In my pipeline, RTMP proved to be a better option, but I still included RTSP option if you think it would better fit your needs.*
 ## 🚀 Usage
 ▶️ **Run the Model**
 ```bash
@@ -45,7 +46,7 @@ python src/main.py
 
 As input, select either:
 - PC (to use a local video file)
-- Camera (to use an RTMP/RTSP stream)
+- Camera (to use an RTMP stream)
 
 After video input is specified, select regions of interest by using Tkinter GUI and clicking around the corners of the region to create a tracked polygon.
 Then save your preferences by clicking <strong><i>Save</i></strong> button and proceed by choosing a YOLO model from the available options.
