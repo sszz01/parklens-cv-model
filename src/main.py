@@ -3,6 +3,7 @@ import os
 import time
 import json
 import numpy as np
+import torch
 
 from ultralytics import solutions, YOLO
 from dotenv import load_dotenv
@@ -101,8 +102,10 @@ else:
 
 print(f"Processing video from: {video_path}")
 
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() and torch.backends.mps.is_built() else "cpu"
+
 def get_results(frame):
-    return model(frame, device="mps",verbose=False)
+    return model(frame, device=device,verbose=False)
 
 def get_parking_spaces(frame):
     results = get_results(frame)
