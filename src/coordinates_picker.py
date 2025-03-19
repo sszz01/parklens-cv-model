@@ -25,10 +25,12 @@ class CustomParkingPtsSelection(ParkingPtsSelection):
         button_frame = self.tk.Frame(self.master)
         button_frame.pack(side=self.tk.TOP)
 
+        self.save_button = self.tk.Button(button_frame, text="Save", command=self.custom_save_to_json)
+        self.save_button.pack(side=self.tk.LEFT)
+
         for text, cmd in [
             ("Remove Last BBox", self.remove_last_bounding_box),
-            ("Remove All BBoxes", self.remove_all_bounding_boxes),
-            ("Save", self.custom_save_to_json),
+            ("Remove All BBoxes", self.remove_all_bounding_boxes)
         ]:
             self.tk.Button(button_frame, text=text, command=cmd).pack(side=self.tk.LEFT)
 
@@ -65,14 +67,31 @@ class CustomParkingPtsSelection(ParkingPtsSelection):
         self.rg_data.clear(), self.current_box.clear()
 
     def custom_save_to_json(self):
-        """Saves the bounding box data to a JSON file, ensuring no duplication."""
+        """Saves the bounding box data to a JSON file, ensuring no duplication and fixing the nested structure."""
         if not self.rg_data:
             self.messagebox.showinfo("Info", "No bounding boxes to save.")
             return
-        json_data = [{"points": bbox} for bbox in self.rg_data]
+
+        # Ensure rg_data is a list of dictionaries with "points" key
+        try:
+            new_bbox_data = [{"points": bbox} if isinstance(bbox, list) else bbox for bbox in self.rg_data]
+        except Exception as e:
+            self.messagebox.showerror("Error", f"Invalid bounding box format: {e}")
+            return
+
+        # Check if the new data is the same as the current saved data
+        try:
+            with open(self.polygon_json_path, "r") as f:
+                existing_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            existing_data = []
+
+        if new_bbox_data == existing_data:
+            self.messagebox.showinfo("Info", "No changes to save.")
+            return
 
         with open(self.polygon_json_path, "w") as f:
-            json.dump(json_data, f, indent=4)
+            json.dump(new_bbox_data, f, indent=4)
 
         self.messagebox.showinfo("Success", "Bounding boxes saved.")
 
@@ -81,6 +100,8 @@ class CustomParkingPtsSelection(ParkingPtsSelection):
             self.messagebox.showinfo("Info", "No bounding boxes to remove.")
             return
         self.rg_data.clear()
+
+        self.save_button.config(state=self.tk.NORMAL)
 
         with open(self.polygon_json_path, "w", encoding="utf-8") as f:
             json.dump([], f, indent=4)
