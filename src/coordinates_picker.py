@@ -29,7 +29,6 @@ class CustomParkingPtsSelection(ParkingPtsSelection):
         self.save_button.pack(side=self.tk.LEFT)
 
         for text, cmd in [
-            ("Remove Last BBox", self.remove_last_bounding_box),
             ("Remove All BBoxes", self.remove_all_bounding_boxes)
         ]:
             self.tk.Button(button_frame, text=text, command=cmd).pack(side=self.tk.LEFT)
