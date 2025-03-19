@@ -47,7 +47,16 @@ while True:
             uploaded = True
 
         if not uploaded:
-            bbox_upd = bool(input("Update bboxes? (y/n): ").strip().lower() == "y")
+            while True:
+                bbox_upd_input = input("Update bboxes? (y/n): ").strip().lower()
+                if bbox_upd_input == "y":
+                    bbox_upd = True
+                    break
+                elif bbox_upd_input == "n":
+                    bbox_upd = False
+                    break
+                else:
+                    print("Invalid input. Please enter 'y' or 'n'.")
             if bbox_upd:
                 with open(polygon_json_path, 'r') as f:
                     bbox_data = json.load(f)
@@ -56,8 +65,11 @@ while True:
                     park_spot_polygon = Polygon([(pt[0], pt[1]) for pt in bbox["points"]])
                     cv2.polylines(first_frame, [pts_array], isClosed=True, color=(255, 0, 0), thickness=3)
                 CustomParkingPtsSelection("Select parking ROI", 1980, 1080, first_frame, polygon_json_path)
-        break
-    print("Invalid input. Please enter 'pc' or 'camera'.")
+                break
+            else:
+                break
+    else:
+        print("Invalid input. Please enter 'pc' or 'camera'.")
 
 print("Available YOLO models:")
 for i, (name, path) in enumerate(models.items(), 1):
