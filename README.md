@@ -27,10 +27,10 @@ ParkLens is a computer vision tool designed to analyze video footage of parking 
 - **Easy Integration – Designed to work with various camera systems, smart parking solutions, and city infrastructure.**
 
 ## What can I use this tool for?
-✔️ Smart parking systems
-✔️ Shopping malls & commercial lots
-✔️ Residential & office buildings
-✔️ City-wide parking optimization
+✔️ Smart parking systems <br>
+✔️ Shopping malls & commercial lots <br>
+✔️ Residential & office buildings <br>
+✔️ City-wide parking optimization <br>
 ✔️ Automated parking enforcement
 
 
