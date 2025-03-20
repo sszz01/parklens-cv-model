@@ -92,7 +92,7 @@ Then save your preferences by clicking <strong><i>Save</i></strong> button and p
 
 **To exit, simply press Q while the video window is open.**
 
-### **Troubleshooting**
+## **Troubleshooting**
 - If you have low recall/precision results on your parking lot footage, try playing around with an IoU (Intersection over Union) threshold in `custom_parking_management.py`. This threshold determines how much overlap between the predicted bounding box and the ground truth is required for a prediction to be considered accurate. By adjusting the IoU threshold, you can tune the model's sensitivity to detect empty or occupied parking spaces more effectively.  
     - **To adjust the IoU threshold:**
       1. Open the `custom_parking_management.py` file.
