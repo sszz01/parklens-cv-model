@@ -92,3 +92,50 @@ Then save your preferences by clicking <strong><i>Save</i></strong> button and p
 
 **To exit, simply press Q while the video window is open.**
 
+### **Troubleshooting**
+- If you have low recall/precision results on your parking lot footage, try playing around with an IoU (Intersection over Union) threshold in `custom_parking_management.py`. This threshold determines how much overlap between the predicted bounding box and the ground truth is required for a prediction to be considered accurate. By adjusting the IoU threshold, you can tune the model's sensitivity to detect empty or occupied parking spaces more effectively.  
+    - **To adjust the IoU threshold:**
+      1. Open the `custom_parking_management.py` file.
+      2. Locate the line of code where the IoU threshold is set (e.g., `iou_threshold = 0.5`).
+      3. Change the value of the threshold to a higher or lower value (e.g., try values between 0.4 to 0.7).
+      4. Test the model's performance on your footage and adjust further if needed.
+    - **Tip**: A lower threshold may improve recall (finding more true positives), but might also increase false positives. A higher threshold can reduce false positives but may miss some true positives (i.e., lower recall).
+  
+- **If the model is not detecting parking spots at all:**
+    1. Ensure that your camera feed is properly linked in the `.env` file, and that the feed is accessible.
+    2. Check that the camera URL (RTMP or RTSP) is valid and that it provides a stable stream.
+    3. Confirm that your system meets the necessary hardware and software requirements, particularly for video processing.
+
+- **Performance issues (lag or low frame rate):**
+    1. Lower the resolution of the input video to reduce the computational load. This can be done by downscaling the video feed or selecting a lower-resolution stream.
+    2. Make sure your environment is set up to use the correct version of OpenCV and YOLOv11, as older versions may cause slower performance.
+    3. Try running the model with a smaller input video or a specific camera feed to isolate performance bottlenecks.
+
+- **Error: `ModuleNotFoundError: No module named 'ultralytics'`:**
+    1. Make sure that all dependencies in `requirements.txt` are correctly installed by running `pip install -r requirements.txt`.
+    2. If the error persists, try manually installing the missing package:
+    ```bash
+    pip install ultralytics
+    ```
+
+- **RTSP feed issues (e.g., lag or no video feed):**
+    1. Verify that the RTSP link provided in the `.env` file is correct and accessible.
+    2. Some cameras require specific settings or authentication for RTSP streams; check your camera's documentation for any necessary configurations.
+    3. Consider switching to an RTMP feed if the RTSP stream is not working reliably.
+
+- **YOLOv11 model not performing as expected:**
+    1. Make sure you're using the correct weights file for YOLOv11. You can download the latest version from the official repository or use a custom-trained model if needed.
+    2. Test with a different set of test images or video footage to ensure the model is not overfitting or underperforming on specific data types.
+
+- **Issues with Tkinter GUI:**
+    1. Ensure that you have the latest version of Tkinter installed. For most systems, you can install it using:
+    ```bash
+    pip install tk
+    ```
+    2. If the GUI is not displaying properly, check for any conflicts with your display drivers or try running the model on a different machine.
+
+- **Model crashing during video feed processing:**
+    1. Check the logs to identify if there are any specific errors causing the crash. Common issues may relate to memory allocation, feed interruptions, or camera incompatibility.
+    2. Ensure your system has sufficient RAM and GPU support for processing video feeds in real time.
+
+
