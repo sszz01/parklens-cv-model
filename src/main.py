@@ -58,12 +58,12 @@ while True:
                 else:
                     print("Invalid input. Please enter 'y' or 'n'.")
             if bbox_upd:
-                with open(polygon_json_path, 'r') as f:
-                    bbox_data = json.load(f)
-                for bbox in bbox_data:
-                    pts_array = np.array(bbox["points"], dtype=np.int32).reshape((-1, 1, 2))
-                    park_spot_polygon = Polygon([(pt[0], pt[1]) for pt in bbox["points"]])
-                    cv2.polylines(first_frame, [pts_array], isClosed=True, color=(255, 0, 0), thickness=3)
+                # with open(polygon_json_path, 'r') as f:
+                #     bbox_data = json.load(f)
+                # for bbox in bbox_data:
+                #     pts_array = np.array(bbox["points"], dtype=np.int32).reshape((-1, 1, 2))
+                #     park_spot_polygon = Polygon([(pt[0], pt[1]) for pt in bbox["points"]])
+                #     cv2.polylines(first_frame, [pts_array], isClosed=True, color=(255, 0, 0), thickness=3)
                 CustomParkingPtsSelection("Select parking ROI", 1980, 1080, first_frame, polygon_json_path)
                 break
             else:
