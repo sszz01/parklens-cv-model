@@ -1,6 +1,7 @@
 import json
 import os
 import cv2
+import numpy as np
 from ultralytics.solutions import ParkingPtsSelection
 
 class CustomParkingPtsSelection(ParkingPtsSelection):
@@ -39,6 +40,7 @@ class CustomParkingPtsSelection(ParkingPtsSelection):
         if os.path.exists(self.polygon_json_path):
             with open(self.polygon_json_path, "r") as f:
                 self.rg_data = json.load(f)
+                self.redraw_bboxes()
         else:
             self.rg_data = []
 
@@ -65,20 +67,26 @@ class CustomParkingPtsSelection(ParkingPtsSelection):
 
         self.rg_data.clear(), self.current_box.clear()
 
+    def redraw_bboxes(self):
+        """Redraws the bounding boxes from the existing JSON data."""
+        for bbox in self.rg_data:
+            pts_array = np.array(bbox["points"], dtype=np.int32).reshape((-1, 1, 2))
+            self.canvas.create_polygon(
+                *pts_array.flatten().tolist(), outline="blue", width=2, fill="", tags="bbox"
+            )
+
     def custom_save_to_json(self):
         """Saves the bounding box data to a JSON file, ensuring no duplication and fixing the nested structure."""
         if not self.rg_data:
             self.messagebox.showinfo("Info", "No bounding boxes to save.")
             return
 
-        # Ensure rg_data is a list of dictionaries with "points" key
         try:
             new_bbox_data = [{"points": bbox} if isinstance(bbox, list) else bbox for bbox in self.rg_data]
         except Exception as e:
             self.messagebox.showerror("Error", f"Invalid bounding box format: {e}")
             return
 
-        # Check if the new data is the same as the current saved data
         try:
             with open(self.polygon_json_path, "r") as f:
                 existing_data = json.load(f)
