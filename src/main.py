@@ -1,13 +1,11 @@
 import cv2
 import os
 import time
-import json
-import numpy as np
 import torch
+import keyboard
 
-from ultralytics import solutions, YOLO
+from ultralytics import YOLO
 from dotenv import load_dotenv
-from shapely.geometry import Polygon
 
 from custom_parking_management import CustomParkingManagement
 from coordinates_picker import CustomParkingPtsSelection
@@ -75,7 +73,7 @@ print("Available YOLO models:")
 for i, (name, path) in enumerate(models.items(), 1):
     print(f"{i}: {name} ({path})")
 
-choice = input("Enter the number of the model you want to use (default: 1): ") or "1"
+choice = input("Enter the number of the model you want to use (Press Enter to use the first model): ") or "1"
 
 try:
     selected_model_name = list(models.keys())[int(choice) - 1]
@@ -86,19 +84,30 @@ except (IndexError, ValueError):
 model_path = models[selected_model_name]
 print(f"Selected model: {selected_model_name} ({model_path})")
 
-def get_valid_input(prompt, lower, upper):
+def get_valid_input(prompt, lower, upper, default=None):
     while True:
+        user_input = input(prompt)
+        if user_input == "":
+            if default is not None:
+                return default
+            else:
+                print("No input provided and no default value set.")
         try:
             value = int(input(prompt))
             if lower <= value <= upper:
                 return value
+            elif keyboard.read_key("enter"):
+                if width is None:
+                    return 640
+                elif height is None:
+                    return 480
             else:
                 print(f"Invalid input. Please enter a value between {lower} and {upper}")
         except ValueError:
             print("Invalid input. Please enter a valid integer.")
 
-width = get_valid_input("Enter the width of the frame (in pixels): ", 640, 1980) or 640 # set 640 by default
-height = get_valid_input("Enter the height of the frame (in pixels): ", 480, 1080) or 480 # set 480 by default
+width = get_valid_input("Enter the width of the frame (in pixels): ", 640, 1980, default=640) # set 640 by default
+height = get_valid_input("Enter the height of the frame (in pixels): ", 480, 1080, default=480) # set 480 by default
 
 stream_res = (width, height)
 print(f"Selected resolution: {stream_res}")
