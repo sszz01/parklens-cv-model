@@ -2,7 +2,6 @@ import cv2
 import os
 import time
 import torch
-import keyboard
 
 from ultralytics import YOLO
 from dotenv import load_dotenv
@@ -96,11 +95,6 @@ def get_valid_input(prompt, lower, upper, default=None):
             value = int(input(prompt))
             if lower <= value <= upper:
                 return value
-            elif keyboard.read_key("enter"):
-                if width is None:
-                    return 640
-                elif height is None:
-                    return 480
             else:
                 print(f"Invalid input. Please enter a value between {lower} and {upper}")
         except ValueError:
