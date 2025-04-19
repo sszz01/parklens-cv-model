@@ -91,6 +91,6 @@ class CustomParkingManagement(ParkingManagement):
                 occupied_spots += 1
         self.pr_info["Occupied"] = occupied_spots
         self.pr_info["Available"] = total_spots - occupied_spots
-        annotator.display_analytics(frame, self.pr_info, (104, 31, 17), (255, 255, 255), 10)
+        # annotator.display_analytics(frame, self.pr_info, (104, 31, 17), (255, 255, 255), 10)
 
         return frame
